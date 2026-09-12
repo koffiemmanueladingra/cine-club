@@ -1,0 +1,25 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    - always_declare_return_types
+    - prefer_final_locals
+    - avoid_print
+    - avoid_empty_else
+    - cancel_subscriptions
+    - close_sinks
+    - unnecessary_await_in_return
+
+analyzer:
+  language:
+    strict-casts: true
+  errors:
+    todo: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**

@@ -1,0 +1,24 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock.bak
+*.iml
+.idea/
+.vscode/
+
+# SECRETS — ne jamais committer les clés
+env.json
+env.*.json
+!env.example.json
+supabase/db.env
+!supabase/db.env.example
+.env
+*.keystore
+*.jks
+
+# OS
+.DS_Store
+Thumbs.db
