@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 
-
 class LocaleController extends ChangeNotifier {
   LocaleController([Locale? initial]) : _locale = initial;
 
