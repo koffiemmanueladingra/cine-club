@@ -15,7 +15,7 @@ concurrency:
 env:
   # Version figée. Sans cela, `channel: stable` fait dériver la CI à chaque
   # publication Flutter et une build verte peut virer au rouge sans commit.
-  FLUTTER_VERSION: "3.35.5"
+  FLUTTER_VERSION: "3.47.3"
 
 jobs:
   quality:

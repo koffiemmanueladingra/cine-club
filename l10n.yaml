@@ -1,16 +1,6 @@
-# Configuration de `flutter gen-l10n`.
-#
-# `synthetic-package: false` + `output-dir` : les classes générées sont écrites
-# dans `lib/l10n/` et versionnées, au lieu du paquet virtuel `package:flutter_gen`.
-# Ce paquet virtuel est supprimé depuis Flutter 3.32.0 stable :
-# https://docs.flutter.dev/release/breaking-changes/flutter-generate-i10n-source
-#
-# `generate: true` dans `pubspec.yaml` reste obligatoire.
-
 arb-dir: lib/l10n/arb
 template-arb-file: app_en.arb
 output-dir: lib/l10n
 output-localization-file: app_localizations.dart
 output-class: AppLocalizations
-synthetic-package: false
 nullable-getter: false
