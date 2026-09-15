@@ -1,0 +1,84 @@
+{
+  "@@locale": "fr",
+
+  "appTitle": "CinéClub",
+
+  "navCatalog": "Catalogue",
+  "navFavorites": "Favoris",
+  "navProfile": "Profil",
+
+  "catalogTitle": "Catalogue",
+  "searchHint": "Rechercher un titre ou un genre",
+  "searchFieldSemantics": "Rechercher dans le catalogue",
+  "emptyCatalog": "Aucun film ne correspond.",
+
+  "retry": "Réessayer",
+  "loading": "Chargement",
+
+  "addToFavorites": "Ajouter aux favoris",
+  "removeFromFavorites": "Retirer des favoris",
+
+  "posterOf": "Affiche de {title}",
+  "movieCardSemantics": "{title}, {details}. Appuyez deux fois pour ouvrir la fiche.",
+
+  "movieDetailTitle": "Détail",
+  "ratingOutOfTen": "noté {rating} sur 10",
+
+  "favoritesTitle": "Mes favoris",
+  "emptyFavorites": "Aucun favori pour le moment.",
+
+  "profileTitle": "Profil",
+  "displayNameLabel": "Nom affiché",
+  "emailLabel": "Adresse e-mail",
+  "userIdLabel": "Identifiant",
+  "editDisplayNameTitle": "Nom affiché",
+  "avatarOf": "Avatar de {name}",
+  "cancel": "Annuler",
+  "save": "Enregistrer",
+  "signOut": "Se déconnecter",
+
+  "languageLabel": "Langue",
+  "languageSystem": "Système",
+  "languageFrench": "Français",
+  "languageEnglish": "English",
+
+  "loginSubtitle": "Connectez-vous pour accéder au catalogue.",
+  "passwordLabel": "Mot de passe",
+  "showPassword": "Afficher le mot de passe",
+  "hidePassword": "Masquer le mot de passe",
+  "signIn": "Se connecter",
+  "createAccountLink": "Créer un compte",
+  "emailRequired": "Saisissez votre adresse e-mail.",
+  "emailInvalid": "Adresse e-mail invalide.",
+  "passwordRequired": "Saisissez votre mot de passe.",
+
+  "registerTitle": "Créer un compte",
+  "submitRegister": "Créer mon compte",
+  "displayNameTooShort": "Au moins {min} caractères.",
+  "passwordTooShort": "Au moins {min} caractères.",
+  "registerConfirmEmail": "Compte créé. Confirmez votre adresse e-mail puis connectez-vous.",
+  "sessionExpired": "Votre session a expiré. Reconnectez-vous.",
+
+  "offlineNoDate": "Mode hors ligne — données enregistrées sur l'appareil.",
+  "offlineSince": "Mode hors ligne — données du {date}.",
+
+  "errorTimeout": "Le serveur met trop de temps à répondre. Réessayez plus tard.",
+  "errorConnection": "Impossible de joindre le serveur. Vérifiez votre connexion Internet.",
+  "errorCertificate": "Connexion non sécurisée : certificat du serveur invalide.",
+  "errorCancelled": "Requête annulée.",
+  "errorUnexpected": "Une erreur inattendue est survenue. Réessayez.",
+  "errorSessionExpired": "Session expirée. Veuillez vous reconnecter.",
+  "errorNotFound": "Ressource introuvable.",
+  "errorAlreadyExists": "Cet élément existe déjà.",
+  "errorTooManyRequests": "Trop de requêtes envoyées. Patientez quelques instants.",
+  "errorServerUnavailable": "Le service est momentanément indisponible.",
+  "errorRequestRejected": "La requête a été refusée (code {code}).",
+  "errorCatalogOffline": "Aucun catalogue enregistré sur cet appareil.",
+  "errorMovieOffline": "Ce film n'est pas disponible hors ligne.",
+  "errorMovieNotFound": "Film introuvable.",
+  "errorFavoritesOffline": "Aucun favori enregistré sur cet appareil.",
+  "errorProfileOffline": "Profil indisponible hors ligne.",
+  "errorProfileNotFound": "Profil introuvable.",
+  "errorWriteOffline": "Cette modification nécessite une connexion Internet.",
+  "errorCacheCorrupted": "Les données locales sont illisibles et ont été ignorées."
+}

@@ -36,7 +36,11 @@ class AsyncState<T> {
         syncedAt: syncedAt,
       );
 
-  AsyncState<T> toReady(T value, {bool fromCache = false, DateTime? syncedAt}) =>
+  AsyncState<T> toReady(
+    T value, {
+    bool fromCache = false,
+    DateTime? syncedAt,
+  }) =>
       AsyncState<T>(
         status: LoadStatus.ready,
         data: value,

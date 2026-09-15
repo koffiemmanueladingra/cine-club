@@ -24,8 +24,7 @@ class SessionManager {
     final raw = await _storage.read(key: _storageKey);
     if (raw == null) return null;
     try {
-      _current =
-          AuthSession.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+      _current = AuthSession.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     } catch (_) {
       await _storage.delete(key: _storageKey);
       _current = null;

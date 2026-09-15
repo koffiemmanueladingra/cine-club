@@ -73,6 +73,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on UnauthorizedException catch (e) {
       return Err(AuthFailure(
         _isCredentialError(e) ? 'E-mail ou mot de passe incorrect.' : e.message,
+        code: FailureCode.serverMessage,
         cause: e,
       ));
     } catch (e) {

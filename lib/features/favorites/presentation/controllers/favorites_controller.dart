@@ -20,13 +20,30 @@ class FavoritesController extends ChangeNotifier {
 
   Failure? get actionFailure => _actionFailure;
 
-  Set<String> get favoriteMovieIds =>
-      (_state.data ?? const <FavoriteMovie>[]).map((f) => f.movie.id).toSet();
+  Set<String> _favoriteMovieIds = const <String>{};
+
+  /// Identifiants des films favoris, recalculés une seule fois par
+  /// changement d'état.
+  ///
+  /// Ce cache n'est pas une micro-optimisation. Chaque carte du catalogue
+  /// interroge cet ensemble via `context.select` ; si le getter reconstruisait
+  /// le `Set` à chaque appel, une notification coûterait O(favoris × cartes)
+  /// au lieu de O(favoris). Sur une liste longue, c'est la différence entre
+  /// une frame à 16 ms et une frame qui saute.
+  Set<String> get favoriteMovieIds => _favoriteMovieIds;
+
+  void _refreshIds() {
+    _favoriteMovieIds = {
+      for (final favorite in _state.data ?? const <FavoriteMovie>[])
+        favorite.movie.id,
+    };
+  }
 
   void bindUser(String? userId) {
     if (_userId == userId) return;
     _userId = userId;
     _state = const AsyncState<List<FavoriteMovie>>();
+    _refreshIds();
     notifyListeners();
   }
 
@@ -46,6 +63,7 @@ class FavoritesController extends ChangeNotifier {
       ),
       err: _state.toError,
     );
+    _refreshIds();
     notifyListeners();
   }
 

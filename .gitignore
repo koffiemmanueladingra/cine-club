@@ -19,6 +19,18 @@ supabase/db.env
 *.keystore
 *.jks
 
+# Couverture de tests (régénérée par `flutter test --coverage`)
+coverage/
+
+# Captures d'écran de travail (les captures du README sont dans docs/screenshots/)
+*.tmp.png
+
+# NOTE : lib/l10n/*.dart est GÉNÉRÉ mais VOLONTAIREMENT VERSIONNÉ.
+# Depuis Flutter 3.32, le paquet virtuel `package:flutter_gen` n'existe plus :
+# les classes sont écrites dans `lib/` et doivent être suivies par git pour
+# que l'analyse et les tests fonctionnent sur un clone neuf.
+# Voir https://docs.flutter.dev/release/breaking-changes/flutter-generate-i10n-source
+
 # OS
 .DS_Store
 Thumbs.db

@@ -1,8 +1,11 @@
 # État réel du projet
 
 Date de rédaction : 10 septembre 2026.
-Dernière mise à jour : 11 septembre 2026 (ajout des identifiants du projet
-Supabase `qkzpjimpmehmfqzgzuqy`).
+Dernière mise à jour : 15 septembre 2026 (version 1.2.0 — i18n,
+accessibilité, performance, tests widgets et intégration, CI).
+
+> **Lisez le § 1 ter avant de considérer la version 1.2.0 comme validée.**
+> Elle a été écrite sans SDK Flutter : rien n'y a été compilé ni exécuté.
 
 ## 1. Ce qui a été fait
 
@@ -43,6 +46,54 @@ Portée de ces preuves : le code compile et la logique de la couche repository
 est conforme. Le comportement réel de l'intercepteur, du refresh, du cache
 Hive et de la RLS reste **non vérifié** — ce sont des tests avec sources
 simulées, sans réseau ni Hive.
+
+## 1 ter. Version 1.2.0 (15/09/2026) — état de vérification
+
+Écrite, comme les précédentes, **sans SDK Flutter à disposition**. Aucune des
+commandes suivantes n'a été exécutée sur ce lot de modifications :
+
+| Commande | Exécutée ? |
+|---|---|
+| `flutter pub get` | non |
+| `flutter gen-l10n` | non |
+| `dart format` | non |
+| `flutter analyze` | non |
+| `flutter test` | non |
+| `flutter test integration_test` | non |
+
+### Ce qui a malgré tout été vérifié mécaniquement
+
+| Contrôle | Méthode | Résultat |
+|---|---|---|
+| Parité des traductions FR/EN | comparaison des clés des deux ARB | 67 clés des deux côtés, aucune manquante |
+| Cohérence des placeholders | extraction des `{...}` par clé | identiques en FR et EN |
+| Clés utilisées vs définies | balayage de `l10n.<clé>` dans tout le code | aucune clé absente, aucune clé orpheline |
+| Classes générées complètes | recherche du getter ou de la méthode par clé | les 67 présentes |
+| Imports | résolution de chaque import relatif et `package:cine_club/` | tous pointent sur un fichier existant |
+| Équilibrage syntaxique | comptage accolades / parenthèses hors chaînes et commentaires | équilibré partout **après correction d'une apostrophe non échappée** dans un nom de test |
+| Membres des doubles de test | croisement appels / déclarations dans `test/support/fakes.dart` | aucun membre appelé qui n'existe pas |
+| Chaînes codées en dur | `grep -rn "Text('" lib/` | aucun résultat |
+| Largeur des lignes | détection des lignes de code > 80 colonnes | 0 restante (hors imports et littéraux, que `dart format` ne réécrit pas) |
+
+Ces contrôles réduisent le risque d'erreur grossière. **Ils ne remplacent pas
+une compilation** : ils ne détectent ni une erreur de type, ni une signature
+incorrecte, ni un `override` manquant.
+
+### Points à traiter au premier passage sur une machine avec le SDK
+
+1. **`dart format .` puis commit.** L'étape de format de la CI était
+   auparavant en `continue-on-error`, donc jamais réellement appliquée : le
+   dépôt contient probablement des fichiers non formatés. Elle est désormais
+   bloquante, la CI sera rouge sinon.
+2. **`pubspec.lock` est obsolète.** Il précède l'ajout de
+   `flutter_localizations`, `intl` et `integration_test` ; `flutter pub get`
+   le régénère.
+3. **`flutter gen-l10n`.** Les classes de `lib/l10n/` ont été produites par un
+   script reproduisant le format de l'outil, pas par l'outil lui-même. La
+   régénération fait foi.
+4. **Badge CI et captures d'écran.** Remplacer `OWNER/REPO` dans le README et
+   produire les cinq images décrites dans `docs/screenshots/README.md`.
+
 
 ## 2. Ce qui n'a PAS été vérifié
 

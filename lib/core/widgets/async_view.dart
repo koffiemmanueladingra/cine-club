@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../state/async_state.dart';
 import 'error_view.dart';
 import 'offline_banner.dart';
 
+/// Rend les quatre états d'un chargement : vide, en cours, prêt, en erreur.
+///
+/// Règle retenue : une erreur ne masque jamais des données déjà présentes.
+/// Si le cache a servi quelque chose, on l'affiche et on se contente d'un
+/// `LinearProgressIndicator` pendant le rafraîchissement.
 class AsyncView<T> extends StatelessWidget {
   const AsyncView({
     super.key,
@@ -18,6 +24,8 @@ class AsyncView<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     if (state.status == LoadStatus.error && !state.hasData) {
       return ErrorView(
         failure: state.failure!,
@@ -26,7 +34,9 @@ class AsyncView<T> extends StatelessWidget {
     }
 
     if (!state.hasData) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(semanticsLabel: l10n.loading),
+      );
     }
 
     final content = builder(context, state.data as T);
@@ -34,7 +44,11 @@ class AsyncView<T> extends StatelessWidget {
     return Column(
       children: [
         if (state.fromCache) OfflineBanner(syncedAt: state.syncedAt),
-        if (state.isLoading) const LinearProgressIndicator(minHeight: 2),
+        if (state.isLoading)
+          Semantics(
+            label: l10n.loading,
+            child: const LinearProgressIndicator(minHeight: 2),
+          ),
         Expanded(
           child: onRetry == null
               ? content

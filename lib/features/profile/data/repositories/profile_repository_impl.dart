@@ -32,7 +32,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final row = _safeRead(userId);
       if (row == null) {
         return const Err<Cached<UserProfile>>(
-          EmptyCacheFailure('Profil indisponible hors ligne.'),
+          EmptyCacheFailure(
+            'Profil indisponible hors ligne.',
+            code: FailureCode.profileOffline,
+          ),
         );
       }
       return Ok(Cached(
@@ -46,7 +49,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final row = await _remote.fetchProfile(userId);
       if (row == null) {
         return const Err<Cached<UserProfile>>(
-          ServerFailure('Profil introuvable.', statusCode: 404),
+          ServerFailure(
+            'Profil introuvable.',
+            statusCode: 404,
+            code: FailureCode.profileNotFound,
+          ),
         );
       }
       await _local.writeProfile(userId, row);
@@ -56,7 +63,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
         syncedAt: _local.lastSyncAt(userId),
       ));
     } on UnauthorizedException catch (e) {
-      return Err(AuthFailure(e.message, cause: e));
+      return Err(
+        AuthFailure(e.message, code: FailureCode.serverMessage, cause: e),
+      );
     } catch (e) {
       final row = _safeRead(userId);
       if (row != null) {
@@ -77,7 +86,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }) async {
     if (!await _networkInfo.isConnected) {
       return const Err<UserProfile>(
-        NetworkFailure('Modification impossible hors ligne.'),
+        NetworkFailure(
+          'Modification impossible hors ligne.',
+          code: FailureCode.writeOffline,
+        ),
       );
     }
     try {
@@ -85,7 +97,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
       await _local.writeProfile(userId, row);
       return Ok(ProfileDto.fromJson(row));
     } on UnauthorizedException catch (e) {
-      return Err(AuthFailure(e.message, cause: e));
+      return Err(
+        AuthFailure(e.message, code: FailureCode.serverMessage, cause: e),
+      );
     } catch (e) {
       return Err(_mapper.fromException(e));
     }

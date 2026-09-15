@@ -36,6 +36,7 @@ class MovieRepositoryImpl implements MovieRepository {
       return _fromCache(
         emptyMessage:
             'Vous êtes hors ligne et aucun film n\'a encore été téléchargé.',
+        emptyCode: FailureCode.catalogOffline,
       );
     }
 
@@ -50,7 +51,9 @@ class MovieRepositoryImpl implements MovieRepository {
         ),
       );
     } on UnauthorizedException catch (e) {
-      return Err(AuthFailure(e.message, cause: e));
+      return Err(
+        AuthFailure(e.message, code: FailureCode.serverMessage, cause: e),
+      );
     } catch (e) {
       final cached = _safeReadCache();
       if (cached.isNotEmpty) {
@@ -81,7 +84,10 @@ class MovieRepositoryImpl implements MovieRepository {
 
     if (!await _networkInfo.isConnected) {
       return const Err<Cached<Movie>>(
-        EmptyCacheFailure('Ce film n\'est pas disponible hors ligne.'),
+        EmptyCacheFailure(
+          'Ce film n\'est pas disponible hors ligne.',
+          code: FailureCode.movieOffline,
+        ),
       );
     }
 
@@ -89,7 +95,11 @@ class MovieRepositoryImpl implements MovieRepository {
       final row = await _remote.fetchMovieById(id);
       if (row == null) {
         return const Err<Cached<Movie>>(
-          ServerFailure('Film introuvable.', statusCode: 404),
+          ServerFailure(
+            'Film introuvable.',
+            statusCode: 404,
+            code: FailureCode.movieNotFound,
+          ),
         );
       }
       return Ok(Cached(MovieDto.fromJson(row), fromCache: false));
@@ -98,9 +108,14 @@ class MovieRepositoryImpl implements MovieRepository {
     }
   }
 
-  Result<Cached<List<Movie>>> _fromCache({required String emptyMessage}) {
+  Result<Cached<List<Movie>>> _fromCache({
+    required String emptyMessage,
+    required FailureCode emptyCode,
+  }) {
     final rows = _safeReadCache();
-    if (rows.isEmpty) return Err(EmptyCacheFailure(emptyMessage));
+    if (rows.isEmpty) {
+      return Err(EmptyCacheFailure(emptyMessage, code: emptyCode));
+    }
     return Ok(
       Cached(
         rows.map(MovieDto.fromJson).toList(growable: false),

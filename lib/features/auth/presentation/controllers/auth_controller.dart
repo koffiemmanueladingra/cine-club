@@ -8,6 +8,13 @@ import '../../domain/repositories/auth_repository.dart';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
+/// Message d'information à afficher, indépendant de la langue.
+///
+/// Le contrôleur ne fabrique aucun texte : il expose un cas, l'interface
+/// choisit la traduction. Sans cela, changer de langue laisserait une phrase
+/// française affichée sur un écran anglais.
+enum AuthNotice { confirmEmail, sessionExpired }
+
 class AuthController extends ChangeNotifier {
   AuthController(this._repository) {
     _subscription = _repository.authStateChanges.listen(_onAuthStateChanged);
@@ -20,14 +27,14 @@ class AuthController extends ChangeNotifier {
   AppUser? _user;
   bool _isSubmitting = false;
   Failure? _failure;
-  String? _notice;
+  AuthNotice? _notice;
 
   AuthStatus get status => _status;
   AppUser? get user => _user;
   bool get isSubmitting => _isSubmitting;
   Failure? get failure => _failure;
 
-  String? get notice => _notice;
+  AuthNotice? get notice => _notice;
 
   Future<void> bootstrap() async {
     final user = await _repository.restoreSession();
@@ -70,8 +77,7 @@ class AuthController extends ChangeNotifier {
       result.fold(
         ok: (outcome) {
           if (!outcome.sessionOpened) {
-            _notice =
-                'Compte créé. Confirmez votre adresse e-mail puis connectez-vous.';
+            _notice = AuthNotice.confirmEmail;
             return true;
           }
           _user = outcome.user;
@@ -106,7 +112,7 @@ class AuthController extends ChangeNotifier {
     if (user == null && _status == AuthStatus.authenticated) {
       _status = AuthStatus.unauthenticated;
       _user = null;
-      _notice = 'Votre session a expiré. Reconnectez-vous.';
+      _notice = AuthNotice.sessionExpired;
       notifyListeners();
     }
   }

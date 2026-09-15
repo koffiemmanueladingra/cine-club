@@ -1,7 +1,25 @@
 # CinéClub — application Flutter full-stack
 
+[![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
+[![Flutter](https://img.shields.io/badge/Flutter-3.35.5-02569B?logo=flutter&logoColor=white)](https://docs.flutter.dev)
+[![Langues](https://img.shields.io/badge/i18n-fr%20%7C%20en-informational)](lib/l10n/arb)
+[![Licence](https://img.shields.io/badge/licence-MIT-lightgrey)](LICENSE)
+
+> Remplacez `OWNER/REPO` dans l'URL du badge CI par le chemin réel du dépôt,
+> sinon le badge restera gris.
+
 Application Flutter connectée à un backend **Supabase** (authentification JWT +
-API REST PostgREST), avec **cache local Hive CE** et **mode hors-ligne**.
+API REST PostgREST), avec **cache local Hive CE**, **mode hors-ligne**,
+**interface bilingue français / anglais** et **étiquettes d'accessibilité**
+sur tous les éléments interactifs.
+
+## Captures d'écran
+
+| Connexion | Catalogue | Détail | Favoris | Profil |
+|---|---|---|---|---|
+| ![Connexion](docs/screenshots/login.png) | ![Catalogue](docs/screenshots/catalog.png) | ![Détail](docs/screenshots/detail.png) | ![Favoris](docs/screenshots/favorites.png) | ![Profil](docs/screenshots/profile.png) |
+
+Procédure de capture : [`docs/screenshots/README.md`](docs/screenshots/README.md).
 
 | Exigence du sujet | Où c'est implémenté |
 |---|---|
@@ -40,11 +58,20 @@ source supabase/db.env && ./supabase/apply_schema.sh
 # 4. Vérification du backend, sans lancer Flutter
 ./supabase/smoke_test.sh
 
-# 5. Lancement
+# 5. Génération des traductions (rejouée automatiquement par `flutter run`)
+flutter gen-l10n
+
+# 6. Lancement
 flutter run --dart-define-from-file=env.json
 
-# 6. Tests unitaires (aucun réseau requis)
-flutter test
+# 7. Qualité — exactement ce que la CI exécute
+#    Au premier passage, lancez d'abord `dart format .` et committez :
+#    l'étape de format était auparavant en `continue-on-error`, le dépôt
+#    peut donc contenir des fichiers jamais formatés.
+dart format --output=none --set-exit-if-changed $(git ls-files '*.dart' | grep -v '^lib/l10n/')
+flutter analyze
+flutter test --coverage          # tests unitaires + tests de widgets
+flutter test integration_test    # tests d'intégration, sans émulateur
 ```
 
 ### Où vivent les secrets
@@ -89,13 +116,19 @@ lib/
 │   ├── session/                 # AuthSession, SessionManager, TokenRefresher
 │   ├── storage/                 # boîtes Hive, JsonBoxStore
 │   ├── state/                   # AsyncState
-│   └── widgets/                 # AsyncView, OfflineBanner, ErrorView
+│   ├── settings/                # LocaleController (langue choisie)
+│   ├── l10n/                    # traduction des Failure (FailureCode -> texte)
+│   └── widgets/                 # AsyncView, OfflineBanner, ErrorView, PosterImage
+├── l10n/
+│   ├── arb/                     # SOURCE des traductions (app_en.arb, app_fr.arb)
+│   └── app_localizations*.dart  # GÉNÉRÉ par `flutter gen-l10n`, versionné
 ├── features/
 │   ├── auth/       {data,domain,presentation}
 │   ├── movies/     {data,domain,presentation}
 │   ├── favorites/  {data,domain,presentation}
 │   └── profile/    {data,domain,presentation}
-├── app.dart                     # thème + aiguillage AuthGate
+├── app.dart                     # thème, locale, aiguillage AuthGate
+├── app_providers.dart           # arbre de providers, substituable en test
 ├── bootstrap.dart               # composition root (seule injection concrète)
 └── main.dart
 ```
@@ -106,11 +139,16 @@ lib/
   Dio, Hive ou Flutter. C'est ce qui rend les tests indépendants des plugins.
 - `data/` contient les *data sources* (un remote, un local) et
   l'implémentation du repository. Elle traduit les `Exception` en `Failure`.
-- `presentation/` ne connaît que les interfaces `domain` et manipule
-  uniquement des `Failure` déjà rédigées en français.
+- `presentation/` ne connaît que les interfaces `domain`. Elle ne reçoit
+  jamais de phrase toute faite : un `Failure` porte un `FailureCode`, un
+  `AuthController` expose un `AuthNotice` — c'est l'écran qui choisit la
+  traduction. Sans cette règle, changer de langue laisserait des phrases
+  françaises sur une interface anglaise.
 - Une seule composition root : `bootstrap.dart`. Aucun singleton global,
   aucun `GetIt` — les dépendances sont fournies par `provider` et donc
-  substituables en test.
+  substituables en test. L'arbre lui-même vit dans `app_providers.dart`, ce
+  qui permet aux tests d'intégration de monter **l'application réelle** en ne
+  remplaçant que les quatre interfaces de `domain/`.
 
 Détails et diagrammes : [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
@@ -231,22 +269,186 @@ GoTrue et PostgREST n'utilisent pas les mêmes clés d'erreur
 ## 7. Tests
 
 ```bash
-flutter test
+flutter test --coverage        # unitaires + widgets
+flutter test integration_test  # intégration
 ```
 
-| Fichier | Couverture |
-|---|---|
-| `test/features/movies/data/movie_repository_impl_test.dart` | 5 règles offline-first, 401 non masqué, cache corrompu, détail |
-| `test/features/favorites/data/favorite_repository_impl_test.dart` | lecture offline-first, refus des mutations hors ligne, resynchro |
-| `test/features/auth/data/auth_repository_impl_test.dart` | persistance de session, message générique, logout garanti |
-| `test/core/network/error_mapper_test.dart` | mapping des familles d'erreurs, extraction du message serveur |
+Trois niveaux, trois intentions différentes.
 
-Mocks via **mocktail** : aucun code généré, aucun `build_runner`. Les tests
-n'ouvrent ni socket ni boîte Hive — ils s'exécutent en CI sans appareil.
+### Tests unitaires — 65 tests
+
+Aucun widget, aucune frame. On vérifie des décisions.
+
+| Fichier | Ce qui est vérifié |
+|---|---|
+| `test/features/movies/data/movie_repository_impl_test.dart` | les 5 règles offline-first, 401 jamais masqué par le cache, cache corrompu |
+| `test/features/favorites/data/favorite_repository_impl_test.dart` | lecture offline-first, refus des écritures hors ligne, resynchro |
+| `test/features/auth/data/auth_repository_impl_test.dart` | persistance de session, message générique, logout garanti |
+| `test/core/network/error_mapper_test.dart` | familles d'erreurs, extraction du message serveur, 5xx jamais détaillé |
+| `test/features/movies/presentation/movies_controller_test.dart` | séquence loading→ready, filtrage, erreur qui n'écrase pas les données |
+| `test/features/favorites/presentation/favorites_controller_test.dart` | bind utilisateur, bascule favori, mémoïsation du `Set` d'identifiants |
+| `test/features/auth/presentation/auth_controller_test.dart` | restauration de session, `isSubmitting`, expiration côté serveur |
+| `test/features/profile/presentation/profile_controller_test.dart` | renommage, échec d'écriture qui ne mute pas l'état affiché |
+
+Les dépôts sont testés avec des **mocks `mocktail`** (on veut contrôler chaque
+appel). Les contrôleurs sont testés avec des **fakes en mémoire**
+(`test/support/fakes.dart`) : on veut vérifier la réaction à un vrai
+changement d'état, pas qu'une méthode a été appelée.
+
+### Tests de widgets — 31 tests
+
+| Fichier | Ce qui est vérifié |
+|---|---|
+| `test/widgets/movie_card_test.dart` | un seul nœud sémantique par carte, libellé du bouton favori, séparation des zones tactiles, note formatée `8,3` en FR et `8.3` en EN |
+| `test/widgets/error_view_test.dart` | l'erreur est traduite **depuis son code**, pas depuis son texte stocké ; message serveur affiché tel quel ; date localisée du bandeau hors ligne |
+| `test/widgets/async_view_test.dart` | les 4 états, et surtout : une erreur ne fait pas disparaître les données du cache |
+| `test/widgets/login_screen_test.dart` | validation du formulaire avant tout appel réseau, affichage de l'échec, bascule FR→EN complète |
+| `test/widgets/movies_screen_test.dart` | rendu de la liste, recherche, ajout de favori, SnackBar d'erreur traduit |
+
+Piège récurrent traité ici : `AppLocalizations.of(context)` lève une exception
+si l'arbre n'a pas les `localizationsDelegates`. Le harnais
+`pumpLocalized()` (`test/support/harness.dart`) les fournit systématiquement.
+De même, `find.bySemanticsLabel` échoue tant que `tester.ensureSemantics()`
+n'a pas été appelé — l'arbre sémantique n'est pas construit par défaut en test.
+
+### Tests d'intégration — 4 parcours
+
+| Fichier | Parcours |
+|---|---|
+| `integration_test/app_flow_test.dart` | connexion → catalogue → fiche → retour ; recherche → profil → déconnexion |
+| `integration_test/favorites_and_locale_test.dart` | favori ajouté au catalogue visible dans l'onglet Favoris et retiré depuis celui-ci ; changement de langue qui retraduit jusqu'à la barre de navigation |
+
+Ils montent le **vrai** `CineClubApp` et ne remplacent que les quatre
+interfaces de `domain/`. Ils tournent avec `flutter test integration_test`
+dans la VM `flutter_tester` : **aucun émulateur nécessaire**, ce qui les rend
+exécutables tels quels dans GitHub Actions.
 
 ---
 
-## 8. Compatibilité
+## 8. Internationalisation
+
+Français et anglais, via le pipeline officiel ARB + `flutter gen-l10n`.
+
+| Élément | Emplacement |
+|---|---|
+| Configuration | `l10n.yaml` |
+| Source des traductions | `lib/l10n/arb/app_en.arb` (modèle, documenté) et `app_fr.arb` |
+| Classes générées | `lib/l10n/app_localizations*.dart` — **versionnées** |
+| Sélecteur de langue | écran Profil (`Système` / `Français` / `English`) |
+
+Deux choix à connaître :
+
+1. **`synthetic-package: false`.** Le paquet virtuel `package:flutter_gen`
+   n'est plus généré depuis Flutter 3.32.0 stable ; les classes sont écrites
+   dans `lib/` et importées par chemin relatif.
+   Référence : [docs.flutter.dev — Localized messages are generated into source](https://docs.flutter.dev/release/breaking-changes/flutter-generate-i10n-source).
+   Corollaire : `generate: true` est obligatoire dans `pubspec.yaml`.
+
+2. **Aucune chaîne n'est fabriquée hors de la couche présentation.** Les
+   erreurs portent un `FailureCode`, les notices d'authentification un
+   `AuthNotice`. La traduction se fait dans `ErrorView`, `LoginScreen`, etc.
+   Le `switch` de `core/l10n/failure_l10n.dart` est exhaustif : ajouter un
+   code sans sa traduction ne compile pas.
+
+Les dates et les nombres passent par `intl` avec la locale active :
+`15/01/2026 10:30` en français, `1/15/2026 10:30 AM` en anglais ; note `8,3`
+contre `8.3`. Ce comportement est couvert par des tests.
+
+---
+
+## 9. Accessibilité
+
+| Élément | Traitement |
+|---|---|
+| Carte de film | un **seul** nœud `Semantics(button: true)` annonçant titre + année + genre + note ; les enfants sont masqués par `ExcludeSemantics`, sinon le lecteur d'écran énonce quatre nœuds pour une seule carte |
+| Bouton favori | placé **hors** de la zone tactile de la carte, avec `tooltip` + `semanticLabel` qui changent selon l'état |
+| Affiches | `semanticLabel` décrivant le film ; le placeholder est `ExcludeSemantics` (icône décorative) |
+| Indicateurs de chargement | `semanticsLabel` — sans lui, rien n'est annoncé pendant l'attente |
+| Erreurs, notices, bandeau hors ligne | `liveRegion: true` : annoncés dès leur apparition |
+| Titres | `Semantics(header: true)` sur l'écran de détail et la connexion, pour la navigation par titres |
+| Champs de saisie | `labelText` suffit — Flutter l'expose déjà ; en ajouter un `Semantics` provoquerait une double annonce |
+
+La note affichée `★ 8,3` est remplacée à la lecture par « noté 8,3 sur 10 » :
+un lecteur d'écran prononce mal le caractère `★`.
+
+---
+
+## 10. Performance
+
+Objectif : 60 fps constants, y compris au défilement du catalogue.
+
+**Images** (`lib/core/widgets/poster_image.dart`)
+
+- `cacheWidth` / `cacheHeight` = taille d'affichage × `devicePixelRatio`. Le
+  moteur redimensionne **pendant** le décodage. Sans cela, une affiche
+  780 × 1170 occupe environ 3,6 Mo en mémoire avant d'être réduite au dessin.
+- Le placeholder a exactement la taille de l'image finale. Une hauteur qui
+  change à l'arrivée de chaque image force un re-layout de toute la liste —
+  la cause de jank la plus fréquente.
+- `gaplessPlayback` + `frameBuilder` en fondu : pas de clignotement blanc.
+- Chargement paresseux assuré par `ListView.builder`, qui ne construit que
+  les éléments visibles (plus le `cacheExtent`).
+
+**Reconstructions**
+
+Le projet n'utilise pas `flutter_hooks` : les widgets sont `const` partout où
+c'est possible et les abonnements sont réduits au strict nécessaire avec
+`context.select`.
+
+| Endroit | Avant | Après |
+|---|---|---|
+| `MoviesScreen` | `context.watch` sur deux contrôleurs → AppBar, champ de recherche et toutes les cartes reconstruits à chaque bascule de favori | l'écran n'écoute rien ; `_MovieList` écoute les films ; `_MovieRow` n'écoute qu'**un booléen** via `context.select` |
+| `FavoritesController.favoriteMovieIds` | `Set` reconstruit à chaque lecture → O(favoris × cartes) par notification | `Set` mémorisé, recalculé une fois par changement d'état |
+| `AuthGate` | `watch` sur tout le contrôleur | `select` sur le seul `AuthStatus` |
+| `CineClubApp` | — | `select` sur la seule `Locale` : changer de langue est le seul rebuild global |
+
+`ListView.builder` insère déjà un `RepaintBoundary` par élément
+(`addRepaintBoundaries: true` par défaut) : en ajouter serait redondant.
+
+**Vérifier soi-même**
+
+```bash
+flutter run --profile --dart-define-from-file=env.json
+# puis DevTools > Performance, activer « Track widget builds »
+```
+
+---
+
+## 11. Intégration continue
+
+Fichier : [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+
+| Étape | Commande | Bloquant |
+|---|---|---|
+| Dépendances | `flutter pub get` | oui |
+| Traductions | `flutter gen-l10n` | oui |
+| Format | `dart format --set-exit-if-changed` (hors `lib/l10n/`) | oui |
+| Analyse statique | `flutter analyze` | oui |
+| Tests unitaires + widgets | `flutter test --coverage` | oui |
+| Tests d'intégration | `flutter test integration_test` | oui |
+| APK de démonstration | `flutter build apk --release` | oui |
+
+Détails qui comptent :
+
+- **Version de Flutter figée** (`FLUTTER_VERSION`). Avec `channel: stable`
+  seul, une publication Flutter peut faire rougir la CI sans aucun commit.
+- **`dart format` est bloquant.** Il était en `continue-on-error`, ce qui
+  revenait à ne pas l'exécuter. `lib/l10n/` en est exclu : la mise en forme
+  de ces fichiers appartient à `gen-l10n`.
+- **`flutter analyze` sans drapeau supplémentaire.** Il sort déjà en code non
+  nul dès la première remarque, y compris les `info` produites par les règles
+  de `analysis_options.yaml`.
+- **Les tests d'intégration tournent sans émulateur**, dans la VM
+  `flutter_tester`. Provisionner un émulateur Android en CI coûte plusieurs
+  minutes par exécution et casse régulièrement.
+- **L'APK est publié en artefact** de chaque build verte
+  (`Actions > run > Artifacts > cine-club-apk`). Il est compilé avec
+  `env.example.json` : il démarre et affiche l'écran de connexion, mais ne
+  joint aucun backend — le vrai `env.json` n'est pas versionné.
+
+---
+
+## 12. Compatibilité
 
 | Plateforme | État | Remarque |
 |---|---|---|
@@ -263,7 +465,7 @@ Problèmes fréquents : [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md).
 
 ---
 
-## 9. Documentation
+## 13. Documentation
 
 | Document | Contenu |
 |---|---|

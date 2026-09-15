@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'core/settings/locale_controller.dart';
 import 'features/auth/presentation/controllers/auth_controller.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/favorites/presentation/controllers/favorites_controller.dart';
@@ -9,15 +10,26 @@ import 'features/movies/presentation/controllers/movies_controller.dart';
 import 'features/movies/presentation/screens/movies_screen.dart';
 import 'features/profile/presentation/controllers/profile_controller.dart';
 import 'features/profile/presentation/screens/profile_screen.dart';
+import 'l10n/app_localizations.dart';
 
 class CineClubApp extends StatelessWidget {
   const CineClubApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Seule la locale est écoutée ici : un changement de langue reconstruit
+    // `MaterialApp`, rien d'autre ne doit provoquer ce rebuild global.
+    final locale = context.select<LocaleController, Locale?>((c) => c.locale);
+
     return MaterialApp(
-      title: 'CinéClub',
+      // `onGenerateTitle` et non `title` : le titre doit être relu après un
+      // changement de langue, et `AppLocalizations` n'existe pas encore au
+      // moment où `title` serait évalué.
+      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
+      locale: locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3D5AFE)),
         useMaterial3: true,
@@ -32,15 +44,29 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final status = context.watch<AuthController>().status;
+    // `select` plutôt que `watch` : seul le statut nous intéresse, un
+    // changement de `isSubmitting` ne doit pas reconstruire tout l'arbre.
+    final status = context.select<AuthController, AuthStatus>((c) => c.status);
 
     return switch (status) {
-      AuthStatus.unknown => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
+      AuthStatus.unknown => const _FullScreenLoader(),
       AuthStatus.unauthenticated => const LoginScreen(),
       AuthStatus.authenticated => const HomeShell(),
     };
+  }
+}
+
+class _FullScreenLoader extends StatelessWidget {
+  const _FullScreenLoader();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(semanticsLabel: l10n.loading),
+      ),
+    );
   }
 }
 
@@ -76,7 +102,12 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
+      // `IndexedStack` conserve l'état et la position de défilement de chaque
+      // onglet : changer d'onglet ne relance ni requête ni reconstruction
+      // complète des listes.
       body: IndexedStack(
         index: _index,
         children: const [
@@ -88,21 +119,21 @@ class _HomeShellState extends State<HomeShell> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (value) => setState(() => _index = value),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.movie_outlined),
-            selectedIcon: Icon(Icons.movie),
-            label: 'Catalogue',
+            icon: const Icon(Icons.movie_outlined),
+            selectedIcon: const Icon(Icons.movie),
+            label: l10n.navCatalog,
           ),
           NavigationDestination(
-            icon: Icon(Icons.favorite_border),
-            selectedIcon: Icon(Icons.favorite),
-            label: 'Favoris',
+            icon: const Icon(Icons.favorite_border),
+            selectedIcon: const Icon(Icons.favorite),
+            label: l10n.navFavorites,
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profil',
+            icon: const Icon(Icons.person_outline),
+            selectedIcon: const Icon(Icons.person),
+            label: l10n.navProfile,
           ),
         ],
       ),

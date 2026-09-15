@@ -3,7 +3,7 @@ description: >-
   CinéClub — application Flutter full-stack connectée à un backend Supabase
   (API REST PostgREST + Auth JWT), avec cache local Hive CE et mode hors-ligne.
 publish_to: "none"
-version: 1.0.0+1
+version: 1.2.0+3
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
@@ -12,6 +12,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  # Traductions Material/Cupertino (dates, boutons système, sens de lecture).
+  flutter_localizations:
+    sdk: flutter
+
+  # `any` est la contrainte recommandée par la documentation Flutter : la
+  # version exacte est imposée par `flutter_localizations`, qui vient du SDK.
+  intl: any
 
   dio: ^5.4.0
 
@@ -27,8 +35,17 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  # Pilote les tests d'intégration (dossier `integration_test/`).
+  integration_test:
+    sdk: flutter
+
   mocktail: ^1.0.0
   flutter_lints: ^4.0.0
 
 flutter:
   uses-material-design: true
+
+  # Obligatoire depuis Flutter 3.32 pour que `flutter gen-l10n` s'exécute.
+  # La configuration vit dans `l10n.yaml`.
+  generate: true

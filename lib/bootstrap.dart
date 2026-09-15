@@ -1,9 +1,8 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:provider/provider.dart';
 
-import 'app.dart';
+import 'app_providers.dart';
 import 'core/config/app_config.dart';
 import 'core/network/dio_factory.dart';
 import 'core/network/network_info.dart';
@@ -17,18 +16,21 @@ import 'features/favorites/data/datasources/favorite_local_data_source.dart';
 import 'features/favorites/data/datasources/favorite_remote_data_source.dart';
 import 'features/favorites/data/repositories/favorite_repository_impl.dart';
 import 'features/favorites/domain/repositories/favorite_repository.dart';
-import 'features/favorites/presentation/controllers/favorites_controller.dart';
 import 'features/movies/data/datasources/movie_local_data_source.dart';
 import 'features/movies/data/datasources/movie_remote_data_source.dart';
 import 'features/movies/data/repositories/movie_repository_impl.dart';
 import 'features/movies/domain/repositories/movie_repository.dart';
-import 'features/movies/presentation/controllers/movies_controller.dart';
 import 'features/profile/data/datasources/profile_local_data_source.dart';
 import 'features/profile/data/datasources/profile_remote_data_source.dart';
 import 'features/profile/data/repositories/profile_repository_impl.dart';
 import 'features/profile/domain/repositories/profile_repository.dart';
-import 'features/profile/presentation/controllers/profile_controller.dart';
 
+/// Composition réelle de l'application : c'est ici, et uniquement ici, que les
+/// implémentations concrètes sont choisies.
+///
+/// Rien dans `lib/features/` ne connaît Dio, Hive ou `connectivity_plus` :
+/// chaque couche ne dépend que des interfaces de `domain/`. C'est ce qui rend
+/// l'arbre remplaçable dans les tests (voir `CineClubProviders`).
 Future<Widget> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -79,26 +81,17 @@ Future<Widget> bootstrap() async {
   );
 
   final authController = AuthController(authRepository);
+
+  // Avant le premier `build` : sans cela, l'écran de connexion s'affiche une
+  // fraction de seconde avant d'être remplacé par le catalogue.
   await authController.bootstrap();
 
-  return MultiProvider(
-    providers: [
-      Provider<NetworkInfo>.value(value: networkInfo),
-      Provider<MovieRepository>.value(value: movieRepository),
-      Provider<FavoriteRepository>.value(value: favoriteRepository),
-      Provider<ProfileRepository>.value(value: profileRepository),
-      Provider<AuthRepository>.value(value: authRepository),
-      ChangeNotifierProvider<AuthController>.value(value: authController),
-      ChangeNotifierProvider<MoviesController>(
-        create: (_) => MoviesController(movieRepository),
-      ),
-      ChangeNotifierProvider<FavoritesController>(
-        create: (_) => FavoritesController(favoriteRepository),
-      ),
-      ChangeNotifierProvider<ProfileController>(
-        create: (_) => ProfileController(profileRepository),
-      ),
-    ],
-    child: const CineClubApp(),
+  return CineClubProviders(
+    authRepository: authRepository,
+    movieRepository: movieRepository,
+    favoriteRepository: favoriteRepository,
+    profileRepository: profileRepository,
+    networkInfo: networkInfo,
+    authController: authController,
   );
 }

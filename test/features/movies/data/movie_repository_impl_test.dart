@@ -177,7 +177,8 @@ void main() {
     test('en ligne et absent du serveur : ServerFailure 404', () async {
       when(local.readMovies).thenReturn(const []);
       when(() => network.isConnected).thenAnswer((_) async => true);
-      when(() => remote.fetchMovieById('inconnu')).thenAnswer((_) async => null);
+      when(() => remote.fetchMovieById('inconnu'))
+          .thenAnswer((_) async => null);
 
       final result = await repository.getMovieById('inconnu');
 

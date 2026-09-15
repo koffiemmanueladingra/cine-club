@@ -19,6 +19,5 @@ class ConnectivityNetworkInfo implements NetworkInfo {
       _connectivity.onConnectivityChanged.map(_hasConnection);
 
   static bool _hasConnection(List<ConnectivityResult> results) =>
-      results.isNotEmpty &&
-      !results.every((r) => r == ConnectivityResult.none);
+      results.isNotEmpty && !results.every((r) => r == ConnectivityResult.none);
 }

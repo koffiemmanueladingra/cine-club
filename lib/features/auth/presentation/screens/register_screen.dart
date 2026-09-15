@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/l10n/failure_l10n.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../controllers/auth_controller.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -16,6 +18,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  static const int _minNameLength = 2;
   static const int _minPasswordLength = 6;
 
   @override
@@ -29,9 +32,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Créer un compte')),
+      appBar: AppBar(title: Text(l10n.registerTitle)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -43,27 +48,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _nameController,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(
-                    labelText: 'Nom affiché',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.displayNameLabel,
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) =>
-                      (value == null || value.trim().length < 2)
-                          ? 'Au moins 2 caractères.'
+                      (value == null || value.trim().length < _minNameLength)
+                          ? l10n.displayNameTooShort('$_minNameLength')
                           : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Adresse e-mail',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.emailLabel,
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) {
                     final text = value?.trim() ?? '';
                     if (!text.contains('@') || !text.contains('.')) {
-                      return 'Adresse e-mail invalide.';
+                      return l10n.emailInvalid;
                     }
                     return null;
                   },
@@ -72,27 +77,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Mot de passe',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.passwordLabel,
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) =>
                       (value == null || value.length < _minPasswordLength)
-                          ? 'Au moins $_minPasswordLength caractères.'
+                          ? l10n.passwordTooShort('$_minPasswordLength')
                           : null,
                 ),
                 if (auth.failure != null) ...[
                   const SizedBox(height: 16),
-                  Text(
-                    auth.failure!.message,
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.error),
+                  Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      auth.failure!.localizedMessage(l10n),
+                      style: TextStyle(color: theme.colorScheme.error),
+                    ),
                   ),
                 ],
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: auth.isSubmitting ? null : _submit,
-                  child: const Text('Créer mon compte'),
+                  child: Text(l10n.submitRegister),
                 ),
               ],
             ),

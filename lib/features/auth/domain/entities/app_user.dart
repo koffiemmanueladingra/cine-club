@@ -16,5 +16,6 @@ class AppUser {
     return at > 0 ? email.substring(0, at) : email;
   }
 
-  String get initial => label.isEmpty ? '?' : label.substring(0, 1).toUpperCase();
+  String get initial =>
+      label.isEmpty ? '?' : label.substring(0, 1).toUpperCase();
 }

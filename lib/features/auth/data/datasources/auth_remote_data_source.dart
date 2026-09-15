@@ -114,7 +114,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         cause: e,
       );
     }
-    return ServerException(message ?? fallback,
-        statusCode: status, cause: e);
+    return ServerException(message ?? fallback, statusCode: status, cause: e);
   }
 }

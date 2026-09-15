@@ -1,0 +1,337 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "CineClub",
+  "@appTitle": {
+    "description": "Application name, shown in the task switcher and on the login screen."
+  },
+
+  "navCatalog": "Catalog",
+  "@navCatalog": {
+    "description": "Bottom navigation label for the movie catalog tab."
+  },
+  "navFavorites": "Favorites",
+  "@navFavorites": {
+    "description": "Bottom navigation label for the favorites tab."
+  },
+  "navProfile": "Profile",
+  "@navProfile": {
+    "description": "Bottom navigation label for the profile tab."
+  },
+
+  "catalogTitle": "Catalog",
+  "@catalogTitle": {
+    "description": "App bar title of the movie catalog screen."
+  },
+  "searchHint": "Search by title or genre",
+  "@searchHint": {
+    "description": "Placeholder of the catalog search field."
+  },
+  "searchFieldSemantics": "Search the movie catalog",
+  "@searchFieldSemantics": {
+    "description": "Screen reader label of the catalog search field."
+  },
+  "emptyCatalog": "No movie matches your search.",
+  "@emptyCatalog": {
+    "description": "Shown when the search filters out every movie."
+  },
+
+  "retry": "Retry",
+  "@retry": {
+    "description": "Label of the button that retries a failed request."
+  },
+  "loading": "Loading",
+  "@loading": {
+    "description": "Screen reader label of progress indicators."
+  },
+
+  "addToFavorites": "Add to favorites",
+  "@addToFavorites": {
+    "description": "Tooltip and screen reader label of the favorite toggle when the movie is not a favorite."
+  },
+  "removeFromFavorites": "Remove from favorites",
+  "@removeFromFavorites": {
+    "description": "Tooltip and screen reader label of the favorite toggle when the movie already is a favorite."
+  },
+
+  "posterOf": "Poster of {title}",
+  "@posterOf": {
+    "description": "Screen reader label of a movie poster image.",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Metropolis"
+      }
+    }
+  },
+  "movieCardSemantics": "{title}, {details}. Double tap to open the details.",
+  "@movieCardSemantics": {
+    "description": "Screen reader label of a whole movie card in a list.",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Metropolis"
+      },
+      "details": {
+        "type": "String",
+        "example": "1927, Science fiction, rated 8.3"
+      }
+    }
+  },
+
+  "movieDetailTitle": "Details",
+  "@movieDetailTitle": {
+    "description": "App bar title of the movie detail screen."
+  },
+  "ratingOutOfTen": "rated {rating} out of 10",
+  "@ratingOutOfTen": {
+    "description": "Spoken form of a movie rating, used in screen reader labels.",
+    "placeholders": {
+      "rating": {
+        "type": "String",
+        "example": "8.3"
+      }
+    }
+  },
+
+  "favoritesTitle": "My favorites",
+  "@favoritesTitle": {
+    "description": "App bar title of the favorites screen."
+  },
+  "emptyFavorites": "No favorites yet.",
+  "@emptyFavorites": {
+    "description": "Shown when the favorites list is empty."
+  },
+
+  "profileTitle": "Profile",
+  "@profileTitle": {
+    "description": "App bar title of the profile screen."
+  },
+  "displayNameLabel": "Display name",
+  "@displayNameLabel": {
+    "description": "Label of the display name field and profile row."
+  },
+  "emailLabel": "Email address",
+  "@emailLabel": {
+    "description": "Label of the email field and profile row."
+  },
+  "userIdLabel": "User ID",
+  "@userIdLabel": {
+    "description": "Label of the profile row showing the account identifier."
+  },
+  "editDisplayNameTitle": "Display name",
+  "@editDisplayNameTitle": {
+    "description": "Title of the dialog used to rename the account."
+  },
+  "avatarOf": "Avatar of {name}",
+  "@avatarOf": {
+    "description": "Screen reader label of the profile avatar.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Ada"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Dismisses a dialog without saving."
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Confirms a dialog and saves the change."
+  },
+  "signOut": "Sign out",
+  "@signOut": {
+    "description": "Label of the sign out button."
+  },
+
+  "languageLabel": "Language",
+  "@languageLabel": {
+    "description": "Label of the language selector in the profile screen."
+  },
+  "languageSystem": "System",
+  "@languageSystem": {
+    "description": "Language option that follows the device setting."
+  },
+  "languageFrench": "Français",
+  "@languageFrench": {
+    "description": "French language option, always written in French."
+  },
+  "languageEnglish": "English",
+  "@languageEnglish": {
+    "description": "English language option, always written in English."
+  },
+
+  "loginSubtitle": "Sign in to browse the catalog.",
+  "@loginSubtitle": {
+    "description": "Subtitle of the login screen."
+  },
+  "passwordLabel": "Password",
+  "@passwordLabel": {
+    "description": "Label of the password field."
+  },
+  "showPassword": "Show password",
+  "@showPassword": {
+    "description": "Screen reader label of the button revealing the password."
+  },
+  "hidePassword": "Hide password",
+  "@hidePassword": {
+    "description": "Screen reader label of the button masking the password."
+  },
+  "signIn": "Sign in",
+  "@signIn": {
+    "description": "Label of the login submit button."
+  },
+  "createAccountLink": "Create an account",
+  "@createAccountLink": {
+    "description": "Label of the link that opens the registration screen."
+  },
+  "emailRequired": "Enter your email address.",
+  "@emailRequired": {
+    "description": "Validation error shown when the email field is empty."
+  },
+  "emailInvalid": "Invalid email address.",
+  "@emailInvalid": {
+    "description": "Validation error shown when the email format is wrong."
+  },
+  "passwordRequired": "Enter your password.",
+  "@passwordRequired": {
+    "description": "Validation error shown when the password field is empty."
+  },
+
+  "registerTitle": "Create an account",
+  "@registerTitle": {
+    "description": "App bar title of the registration screen."
+  },
+  "submitRegister": "Create my account",
+  "@submitRegister": {
+    "description": "Label of the registration submit button."
+  },
+  "displayNameTooShort": "At least {min} characters.",
+  "@displayNameTooShort": {
+    "description": "Validation error shown when the display name is too short.",
+    "placeholders": {
+      "min": {
+        "type": "String",
+        "example": "2"
+      }
+    }
+  },
+  "passwordTooShort": "At least {min} characters.",
+  "@passwordTooShort": {
+    "description": "Validation error shown when the password is too short.",
+    "placeholders": {
+      "min": {
+        "type": "String",
+        "example": "6"
+      }
+    }
+  },
+  "registerConfirmEmail": "Account created. Confirm your email address, then sign in.",
+  "@registerConfirmEmail": {
+    "description": "Notice shown after registering when email confirmation is required."
+  },
+  "sessionExpired": "Your session has expired. Please sign in again.",
+  "@sessionExpired": {
+    "description": "Notice shown when the refresh token could not be renewed."
+  },
+
+  "offlineNoDate": "Offline — showing data stored on this device.",
+  "@offlineNoDate": {
+    "description": "Offline banner shown when the cache has no timestamp."
+  },
+  "offlineSince": "Offline — data from {date}.",
+  "@offlineSince": {
+    "description": "Offline banner shown when the cache timestamp is known.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "15/01/2026 10:30"
+      }
+    }
+  },
+
+  "errorTimeout": "The server is taking too long to answer. Try again later.",
+  "@errorTimeout": {
+    "description": "Network failure caused by a timeout."
+  },
+  "errorConnection": "Cannot reach the server. Check your internet connection.",
+  "@errorConnection": {
+    "description": "Network failure caused by a connection error."
+  },
+  "errorCertificate": "Insecure connection: the server certificate is invalid.",
+  "@errorCertificate": {
+    "description": "Network failure caused by a bad TLS certificate."
+  },
+  "errorCancelled": "Request cancelled.",
+  "@errorCancelled": {
+    "description": "Failure raised when a request is cancelled."
+  },
+  "errorUnexpected": "Something went wrong. Try again.",
+  "@errorUnexpected": {
+    "description": "Fallback message for unclassified failures."
+  },
+  "errorSessionExpired": "Session expired. Please sign in again.",
+  "@errorSessionExpired": {
+    "description": "Failure raised on HTTP 401 or 403 without a server message."
+  },
+  "errorNotFound": "Resource not found.",
+  "@errorNotFound": {
+    "description": "Failure raised on HTTP 404."
+  },
+  "errorAlreadyExists": "This item already exists.",
+  "@errorAlreadyExists": {
+    "description": "Failure raised on HTTP 409."
+  },
+  "errorTooManyRequests": "Too many requests. Wait a moment.",
+  "@errorTooManyRequests": {
+    "description": "Failure raised on HTTP 429."
+  },
+  "errorServerUnavailable": "The service is temporarily unavailable.",
+  "@errorServerUnavailable": {
+    "description": "Failure raised on HTTP 5xx."
+  },
+  "errorRequestRejected": "The request was rejected (code {code}).",
+  "@errorRequestRejected": {
+    "description": "Failure raised on an unmapped 4xx status code.",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "418"
+      }
+    }
+  },
+  "errorCatalogOffline": "No catalog stored on this device yet.",
+  "@errorCatalogOffline": {
+    "description": "Empty cache failure for the movie list."
+  },
+  "errorMovieOffline": "This movie is not available offline.",
+  "@errorMovieOffline": {
+    "description": "Empty cache failure for a single movie."
+  },
+  "errorMovieNotFound": "Movie not found.",
+  "@errorMovieNotFound": {
+    "description": "Server failure when a movie id does not exist."
+  },
+  "errorFavoritesOffline": "No favorites stored on this device yet.",
+  "@errorFavoritesOffline": {
+    "description": "Empty cache failure for the favorites list."
+  },
+  "errorProfileOffline": "Profile unavailable offline.",
+  "@errorProfileOffline": {
+    "description": "Empty cache failure for the profile."
+  },
+  "errorProfileNotFound": "Profile not found.",
+  "@errorProfileNotFound": {
+    "description": "Server failure when the profile row is missing."
+  },
+  "errorWriteOffline": "This change requires an internet connection.",
+  "@errorWriteOffline": {
+    "description": "Failure raised when a write is attempted while offline."
+  },
+  "errorCacheCorrupted": "Local data is unreadable and was ignored.",
+  "@errorCacheCorrupted": {
+    "description": "Failure raised when the Hive cache cannot be decoded."
+  }
+}

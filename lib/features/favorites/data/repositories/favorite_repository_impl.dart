@@ -39,6 +39,7 @@ class FavoriteRepositoryImpl implements FavoriteRepository {
         return const Err<Cached<List<FavoriteMovie>>>(
           EmptyCacheFailure(
             'Vous êtes hors ligne et vos favoris ne sont pas encore enregistrés.',
+            code: FailureCode.favoritesOffline,
           ),
         );
       }
@@ -58,7 +59,9 @@ class FavoriteRepositoryImpl implements FavoriteRepository {
         syncedAt: _local.lastSyncAt(userId),
       ));
     } on UnauthorizedException catch (e) {
-      return Err(AuthFailure(e.message, cause: e));
+      return Err(
+        AuthFailure(e.message, code: FailureCode.serverMessage, cause: e),
+      );
     } catch (e) {
       final rows = _safeRead(userId);
       if (rows.isNotEmpty) {
@@ -91,7 +94,9 @@ class FavoriteRepositoryImpl implements FavoriteRepository {
     String userId,
   ) async {
     if (!await _networkInfo.isConnected) {
-      return const Err<void>(NetworkFailure(_offlineWriteMessage));
+      return const Err<void>(
+        NetworkFailure(_offlineWriteMessage, code: FailureCode.writeOffline),
+      );
     }
     try {
       await action();
@@ -101,7 +106,9 @@ class FavoriteRepositoryImpl implements FavoriteRepository {
       } catch (_) {}
       return const Ok<void>(null);
     } on UnauthorizedException catch (e) {
-      return Err<void>(AuthFailure(e.message, cause: e));
+      return Err<void>(
+        AuthFailure(e.message, code: FailureCode.serverMessage, cause: e),
+      );
     } catch (e) {
       return Err<void>(_mapper.fromException(e));
     }

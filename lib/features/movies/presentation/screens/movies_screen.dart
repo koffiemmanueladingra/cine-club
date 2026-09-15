@@ -1,73 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/l10n/failure_l10n.dart';
 import '../../../../core/widgets/async_view.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../favorites/presentation/controllers/favorites_controller.dart';
 import '../../domain/entities/movie.dart';
 import '../controllers/movies_controller.dart';
 import '../widgets/movie_card.dart';
 import 'movie_detail_screen.dart';
 
+/// Catalogue des films.
+///
+/// Découpage des reconstructions, du plus large au plus étroit :
+/// - `MoviesScreen` n'écoute **rien** : l'`AppBar` et le champ de recherche
+///   ne sont jamais reconstruits ;
+/// - `_MovieList` n'écoute que `MoviesController` ;
+/// - `_MovieRow` n'écoute qu'un seul booléen de `FavoritesController`.
+///
+/// Conséquence concrète : mettre un film en favori reconstruit une carte, pas
+/// l'écran. Avec le `context.watch` d'origine, la même action reconstruisait
+/// la barre d'application, le `TextField` et les cartes visibles.
 class MoviesScreen extends StatelessWidget {
   const MoviesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = context.watch<MoviesController>();
-    final favorites = context.watch<FavoritesController>();
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Catalogue'),
+        title: Text(l10n.catalogTitle),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(56),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: TextField(
-              onChanged: controller.search,
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                hintText: 'Rechercher un titre ou un genre',
-                isDense: true,
-                border: OutlineInputBorder(),
+            child: Semantics(
+              textField: true,
+              label: l10n.searchFieldSemantics,
+              child: TextField(
+                // `read` et non `watch` : on écrit dans le contrôleur, on ne
+                // dépend pas de son état pour se dessiner.
+                onChanged: context.read<MoviesController>().search,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search),
+                  hintText: l10n.searchHint,
+                  isDense: true,
+                  border: const OutlineInputBorder(),
+                ),
               ),
             ),
           ),
         ),
       ),
-      body: AsyncView<List<Movie>>(
-        state: controller.state,
-        onRetry: () => controller.load(forceRefresh: true),
-        builder: (context, _) {
-          final movies = controller.visibleMovies;
-          if (movies.isEmpty) {
-            return const _EmptyList(message: 'Aucun film ne correspond.');
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            itemCount: movies.length,
-            itemBuilder: (context, index) {
-              final movie = movies[index];
-              return MovieCard(
-                movie: movie,
-                isFavorite: favorites.favoriteMovieIds.contains(movie.id),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => MovieDetailScreen(movieId: movie.id),
-                  ),
-                ),
-                onToggleFavorite: () => _toggle(context, movie.id),
-              );
-            },
-          );
-        },
+      body: const _MovieList(),
+    );
+  }
+}
+
+class _MovieList extends StatelessWidget {
+  const _MovieList();
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = context.watch<MoviesController>();
+    final l10n = AppLocalizations.of(context);
+
+    return AsyncView<List<Movie>>(
+      state: controller.state,
+      onRetry: () => controller.load(forceRefresh: true),
+      builder: (context, _) {
+        final movies = controller.visibleMovies;
+        if (movies.isEmpty) {
+          return _EmptyList(message: l10n.emptyCatalog);
+        }
+        // `ListView.builder` ne construit que les éléments visibles (plus le
+        // `cacheExtent`) : c'est le chargement paresseux des affiches.
+        // Il insère aussi un `RepaintBoundary` par élément par défaut
+        // (`addRepaintBoundaries: true`), inutile d'en rajouter.
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          itemCount: movies.length,
+          itemBuilder: (context, index) {
+            final movie = movies[index];
+            return _MovieRow(key: ValueKey(movie.id), movie: movie);
+          },
+        );
+      },
+    );
+  }
+}
+
+class _MovieRow extends StatelessWidget {
+  const _MovieRow({super.key, required this.movie});
+
+  final Movie movie;
+
+  @override
+  Widget build(BuildContext context) {
+    // `select` crée un abonnement sur la *valeur* retournée : cette carte ne
+    // se reconstruit que si son propre statut de favori change.
+    final isFavorite = context.select<FavoritesController, bool>(
+      (c) => c.favoriteMovieIds.contains(movie.id),
+    );
+
+    return MovieCard(
+      movie: movie,
+      isFavorite: isFavorite,
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => MovieDetailScreen(movieId: movie.id),
+        ),
       ),
+      onToggleFavorite: () => _toggle(context, movie.id),
     );
   }
 
   Future<void> _toggle(BuildContext context, String movieId) async {
     final favorites = context.read<FavoritesController>();
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
 
     final success = await favorites.toggle(movieId);
     if (success) return;
@@ -75,7 +127,9 @@ class MoviesScreen extends StatelessWidget {
     final failure = favorites.actionFailure;
     if (failure == null) return;
     favorites.clearActionFailure();
-    messenger.showSnackBar(SnackBar(content: Text(failure.message)));
+    messenger.showSnackBar(
+      SnackBar(content: Text(failure.localizedMessage(l10n))),
+    );
   }
 }
 

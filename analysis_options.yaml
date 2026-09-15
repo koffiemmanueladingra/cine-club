@@ -10,6 +10,13 @@ linter:
     - close_sinks
     - unnecessary_await_in_return
 
+    # Interdit d'utiliser un BuildContext après un `await`. C'est la cause la
+    # plus fréquente d'exception en production : l'utilisateur quitte l'écran
+    # pendant la requête, le widget est démonté, et le `ScaffoldMessenger`
+    # appelé au retour n'existe plus. Le code capture donc `messenger`,
+    # `navigator` et `l10n` AVANT chaque `await`.
+    - use_build_context_synchronously
+
 analyzer:
   language:
     strict-casts: true
@@ -23,3 +30,7 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
+    # Code produit par `flutter gen-l10n`. Il porte déjà
+    # `// ignore_for_file: type=lint` ; l'exclure garantit qu'un changement de
+    # mise en forme de l'outil ne fera jamais rougir la CI.
+    - lib/l10n/app_localizations*.dart

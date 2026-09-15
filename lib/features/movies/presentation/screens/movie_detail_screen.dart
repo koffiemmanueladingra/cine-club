@@ -5,9 +5,12 @@ import '../../../../core/error/cached.dart';
 import '../../../../core/error/result.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/offline_banner.dart';
+import '../../../../core/widgets/poster_image.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../favorites/presentation/controllers/favorites_controller.dart';
 import '../../domain/entities/movie.dart';
 import '../../domain/repositories/movie_repository.dart';
+import '../widgets/movie_meta.dart';
 
 class MovieDetailScreen extends StatefulWidget {
   const MovieDetailScreen({super.key, required this.movieId});
@@ -24,21 +27,34 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _future = context.read<MovieRepository>().getMovieById(widget.movieId);
+    _future = _load();
   }
+
+  Future<Result<Cached<Movie>>> _load() =>
+      context.read<MovieRepository>().getMovieById(widget.movieId);
 
   @override
   Widget build(BuildContext context) {
-    final favorites = context.watch<FavoritesController>();
-    final isFavorite = favorites.favoriteMovieIds.contains(widget.movieId);
+    final l10n = AppLocalizations.of(context);
+
+    final isFavorite = context.select<FavoritesController, bool>(
+      (c) => c.favoriteMovieIds.contains(widget.movieId),
+    );
+    final favoriteLabel =
+        isFavorite ? l10n.removeFromFavorites : l10n.addToFavorites;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Détail'),
+        title: Text(l10n.movieDetailTitle),
         actions: [
           IconButton(
-            onPressed: () => favorites.toggle(widget.movieId),
-            icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+            onPressed: () =>
+                context.read<FavoritesController>().toggle(widget.movieId),
+            tooltip: favoriteLabel,
+            icon: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              semanticLabel: favoriteLabel,
+            ),
           ),
         ],
       ),
@@ -46,16 +62,15 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
         future: _future,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+              child: CircularProgressIndicator(semanticsLabel: l10n.loading),
+            );
           }
           return snapshot.data!.fold(
             ok: (cached) => _Details(cached: cached),
             err: (failure) => ErrorView(
               failure: failure,
-              onRetry: () => setState(() {
-                _future =
-                    context.read<MovieRepository>().getMovieById(widget.movieId);
-              }),
+              onRetry: () => setState(() => _future = _load()),
             ),
           );
         },
@@ -73,6 +88,8 @@ class _Details extends StatelessWidget {
   Widget build(BuildContext context) {
     final movie = cached.data;
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final localeName = Localizations.localeOf(context).toLanguageTag();
 
     return Column(
       children: [
@@ -82,26 +99,31 @@ class _Details extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             children: [
               if (movie.posterUrl != null)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    movie.posterUrl!,
+                Center(
+                  child: PosterImage(
+                    url: movie.posterUrl,
+                    width: 220 * 2 / 3,
                     height: 220,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    borderRadius: 12,
+                    semanticLabel: l10n.posterOf(movie.title),
                   ),
                 ),
               const SizedBox(height: 20),
-              Text(movie.title, style: theme.textTheme.headlineSmall),
+              // `header: true` permet de sauter directement au titre avec les
+              // gestes de navigation par titres de TalkBack / VoiceOver.
+              Semantics(
+                header: true,
+                child: Text(movie.title, style: theme.textTheme.headlineSmall),
+              ),
               const SizedBox(height: 8),
-              Text(
-                [
-                  if (movie.releaseYear != null) '${movie.releaseYear}',
-                  if (movie.genre != null) movie.genre!,
-                  if (movie.rating != null)
-                    '★ ${movie.rating!.toStringAsFixed(1)}/10',
-                ].join(' · '),
-                style: theme.textTheme.labelLarge,
+              Semantics(
+                label: movieMetaSpoken(movie, l10n, localeName),
+                child: ExcludeSemantics(
+                  child: Text(
+                    movieMetaLine(movie, localeName),
+                    style: theme.textTheme.labelLarge,
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
               Text(movie.overview, style: theme.textTheme.bodyMedium),
