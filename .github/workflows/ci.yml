@@ -6,15 +6,11 @@ on:
   pull_request:
   workflow_dispatch:
 
-# Annule les exécutions précédentes sur la même branche : inutile de payer
-# trois fois la même analyse pendant une série de commits.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  # Version figée. Sans cela, `channel: stable` fait dériver la CI à chaque
-  # publication Flutter et une build verte peut virer au rouge sans commit.
   FLUTTER_VERSION: "3.47.3"
 
 jobs:
@@ -34,15 +30,10 @@ jobs:
         run: flutter pub get
 
       - name: Génération des traductions
-        # Rejoue gen-l10n avant tout le reste : l'analyse et les tests
-        # travaillent ainsi sur la sortie réelle de l'outil, pas sur une
-        # version potentiellement obsolète du dépôt. Les fichiers restent
-        # versionnés pour qu'un clone neuf compile sans cette étape.
+
         run: flutter gen-l10n
 
       - name: Format
-        # Bloquant (plus de continue-on-error). `lib/l10n/` est exclu : ces
-        # fichiers sont générés, leur mise en forme appartient à l'outil.
         run: |
           FILES=$(git ls-files '*.dart' | grep -v '^lib/l10n/' || true)
           if [ -n "$FILES" ]; then
@@ -50,18 +41,23 @@ jobs:
           fi
 
       - name: Analyse statique
-        # `flutter analyze` sort déjà en code non nul dès la première
-        # remarque, y compris les `info` produites par les règles de
-        # `analysis_options.yaml` : aucun drapeau supplémentaire n'est requis.
+
         run: flutter analyze
 
       - name: Tests unitaires et de widgets
         run: flutter test --coverage --reporter=expanded
 
+            - name: Dépendances système pour Linux desktop
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libgtk-3-dev xvfb \
+            libsecret-1-dev libjsoncpp-dev
+
       - name: Tests d'intégration
-        # `flutter test integration_test` les exécute dans la VM
-        # `flutter_tester`, sans émulateur : pas d'appareil à provisionner.
-        run: flutter test integration_test --reporter=expanded
+
+        run: |
+          flutter config --enable-linux-desktop
+          xvfb-run -a flutter test integration_test -d linux --reporter=expanded
 
       - name: Rapport de couverture
         uses: actions/upload-artifact@v4
@@ -92,9 +88,7 @@ jobs:
         run: flutter pub get
 
       - name: Configuration d'exemple
-        # Le vrai `env.json` n'est pas versionné (il contient l'URL du projet
-        # Supabase). L'APK de démonstration est construit avec le gabarit :
-        # il se lance et affiche l'écran de connexion, sans backend joignable.
+
         run: cp env.example.json env.ci.json
 
       - name: Build APK release
