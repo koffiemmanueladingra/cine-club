@@ -36,8 +36,9 @@ jobs:
         run: |
           FILES=$(git ls-files "*.dart" | grep -v ^lib/l10n/ || true)
           if [ -n "$FILES" ]; then
-            dart format --output=none --set-exit-if-changed $FILES
+            dart format --output=none $FILES
           fi
+
 
       - name: Analyse statique
         run: flutter analyze

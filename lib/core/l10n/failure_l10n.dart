@@ -22,9 +22,7 @@ extension FailureL10n on Failure {
         FailureCode.profileNotFound => l10n.errorProfileNotFound,
         FailureCode.writeOffline => l10n.errorWriteOffline,
         FailureCode.cacheCorrupted => l10n.errorCacheCorrupted,
-
         FailureCode.serverMessage => message,
-
         FailureCode.unknown => message.isEmpty ? l10n.errorUnexpected : message,
       };
 }
