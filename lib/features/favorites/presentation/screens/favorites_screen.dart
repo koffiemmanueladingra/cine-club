@@ -51,8 +51,6 @@ class _FavoritesList extends StatelessWidget {
             return MovieCard(
               key: ValueKey(favorite.favoriteId),
               movie: favorite.movie,
-              // Sur cet écran, tout élément listé est par définition un
-              // favori : pas besoin d'interroger le contrôleur.
               isFavorite: true,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(

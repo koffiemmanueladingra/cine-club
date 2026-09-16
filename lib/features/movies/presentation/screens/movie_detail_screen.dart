@@ -109,8 +109,6 @@ class _Details extends StatelessWidget {
                   ),
                 ),
               const SizedBox(height: 20),
-              // `header: true` permet de sauter directement au titre avec les
-              // gestes de navigation par titres de TalkBack / VoiceOver.
               Semantics(
                 header: true,
                 child: Text(movie.title, style: theme.textTheme.headlineSmall),

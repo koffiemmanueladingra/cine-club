@@ -16,9 +16,6 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = context.watch<ProfileController>();
     final l10n = AppLocalizations.of(context);
-
-    // Seul le champ e-mail dépend de `AuthController` : `select` évite que
-    // l'écran se reconstruise pendant une déconnexion en cours.
     final email = context.select<AuthController, String?>((c) => c.user?.email);
 
     return Scaffold(

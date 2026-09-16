@@ -5,11 +5,6 @@ import '../state/async_state.dart';
 import 'error_view.dart';
 import 'offline_banner.dart';
 
-/// Rend les quatre états d'un chargement : vide, en cours, prêt, en erreur.
-///
-/// Règle retenue : une erreur ne masque jamais des données déjà présentes.
-/// Si le cache a servi quelque chose, on l'affiche et on se contente d'un
-/// `LinearProgressIndicator` pendant le rafraîchissement.
 class AsyncView<T> extends StatelessWidget {
   const AsyncView({
     super.key,

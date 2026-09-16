@@ -13,16 +13,6 @@ import 'features/movies/presentation/controllers/movies_controller.dart';
 import 'features/profile/domain/repositories/profile_repository.dart';
 import 'features/profile/presentation/controllers/profile_controller.dart';
 
-/// Arbre de providers de l'application.
-///
-/// Séparé de `bootstrap()` volontairement. `bootstrap()` fait des choses
-/// qu'un test ne peut pas faire : ouvrir Hive, lire le trousseau système via
-/// `flutter_secure_storage`, interroger `connectivity_plus`. Ces trois-là
-/// dépendent de canaux de plateforme absents du `flutter_tester`.
-///
-/// En isolant l'arbre, les tests d'intégration branchent des implémentations
-/// en mémoire des mêmes interfaces et exercent **le vrai code d'interface**,
-/// sans toucher au réseau ni au disque.
 class CineClubProviders extends StatelessWidget {
   const CineClubProviders({
     super.key,
@@ -42,9 +32,6 @@ class CineClubProviders extends StatelessWidget {
   final ProfileRepository profileRepository;
   final NetworkInfo networkInfo;
 
-  /// Fourni déjà construit : `bootstrap()` doit pouvoir appeler
-  /// `authController.bootstrap()` (restauration de session) **avant** le
-  /// premier `build`, sinon l'écran de connexion clignote au démarrage.
   final AuthController authController;
 
   final LocaleController? localeController;

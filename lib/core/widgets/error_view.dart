@@ -4,10 +4,6 @@ import '../../l10n/app_localizations.dart';
 import '../error/failures.dart';
 import '../l10n/failure_l10n.dart';
 
-/// État d'erreur plein écran, avec action de reprise.
-///
-/// Le message affiché vient de `failure.localizedMessage(l10n)` et non de
-/// `failure.message` : l'échec porte un code, la traduction est choisie ici.
 class ErrorView extends StatelessWidget {
   const ErrorView({super.key, required this.failure, this.onRetry});
 
@@ -25,8 +21,6 @@ class ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Icône purement décorative : le texte juste en dessous porte
-            // déjà l'information, l'annoncer deux fois nuit à la lecture.
             ExcludeSemantics(
               child: Icon(_icon, size: 48, color: theme.colorScheme.outline),
             ),

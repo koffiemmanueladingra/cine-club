@@ -1,11 +1,6 @@
 import '../../l10n/app_localizations.dart';
 import '../error/failures.dart';
 
-/// Traduit un [Failure] dans la locale active.
-///
-/// Le `switch` est exhaustif sur [FailureCode] : ajouter un code sans ajouter
-/// sa traduction devient une erreur de compilation, pas un texte manquant
-/// découvert en production.
 extension FailureL10n on Failure {
   String localizedMessage(AppLocalizations l10n) => switch (code) {
         FailureCode.timeout => l10n.errorTimeout,
@@ -28,11 +23,8 @@ extension FailureL10n on Failure {
         FailureCode.writeOffline => l10n.errorWriteOffline,
         FailureCode.cacheCorrupted => l10n.errorCacheCorrupted,
 
-        // Texte venu du serveur : affiché tel quel, aucune traduction possible.
         FailureCode.serverMessage => message,
 
-        // Échec non classé : on retombe sur le message technique s'il existe,
-        // sinon sur une formulation générique traduite.
         FailureCode.unknown => message.isEmpty ? l10n.errorUnexpected : message,
       };
 }

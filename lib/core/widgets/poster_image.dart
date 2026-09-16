@@ -1,25 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Affiche d'un film, optimisée pour le défilement.
-///
-/// Trois points comptent pour tenir 60 fps sur une liste :
-///
-/// 1. **Décodage à la taille d'affichage.** `cacheWidth` / `cacheHeight`
-///    demandent au moteur de redimensionner l'image *pendant* le décodage.
-///    Sans eux, une affiche 780×1170 est décodée en entier (≈ 3,6 Mo en RAM)
-///    puis réduite au moment du dessin : mémoire gaspillée et pics GC visibles.
-///    Les valeurs sont multipliées par le `devicePixelRatio` pour rester nettes
-///    sur écran haute densité.
-///    Référence : https://api.flutter.dev/flutter/widgets/Image/Image.network.html
-///
-/// 2. **Taille réservée d'avance.** Le placeholder occupe exactement la place
-///    de l'image finale. Sans cela, l'arrivée de chaque image change la hauteur
-///    de la ligne et provoque un re-layout de toute la liste — la cause la plus
-///    fréquente de jank au scroll.
-///
-/// 3. **Chargement paresseux.** Aucune préparation ici : c'est `ListView.builder`
-///    qui ne construit que les éléments visibles, donc seules les affiches à
-///    l'écran (plus le cache-extent) déclenchent une requête réseau.
 class PosterImage extends StatelessWidget {
   const PosterImage({
     super.key,
@@ -34,7 +14,6 @@ class PosterImage extends StatelessWidget {
   final double width;
   final double height;
 
-  /// Lu par les lecteurs d'écran. Décrit le film, pas le fichier image.
   final String semanticLabel;
 
   final double borderRadius;
@@ -58,8 +37,6 @@ class PosterImage extends StatelessWidget {
         cacheWidth: (width * ratio).round(),
         cacheHeight: (height * ratio).round(),
         semanticLabel: semanticLabel,
-        // Garde l'image précédente pendant le rechargement : évite un
-        // clignotement blanc quand l'URL change.
         gaplessPlayback: true,
         filterQuality: FilterQuality.low,
         frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
@@ -93,8 +70,6 @@ class _Placeholder extends StatelessWidget {
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(6),
         ),
-        // Icône décorative : masquée aux lecteurs d'écran, le libellé utile
-        // est porté par `PosterImage.semanticLabel`.
         child: const ExcludeSemantics(child: Icon(Icons.movie_outlined)),
       );
 }

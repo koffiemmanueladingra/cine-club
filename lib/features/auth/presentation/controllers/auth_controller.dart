@@ -8,11 +8,6 @@ import '../../domain/repositories/auth_repository.dart';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
-/// Message d'information à afficher, indépendant de la langue.
-///
-/// Le contrôleur ne fabrique aucun texte : il expose un cas, l'interface
-/// choisit la traduction. Sans cela, changer de langue laisserait une phrase
-/// française affichée sur un écran anglais.
 enum AuthNotice { confirmEmail, sessionExpired }
 
 class AuthController extends ChangeNotifier {

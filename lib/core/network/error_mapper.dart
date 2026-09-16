@@ -3,16 +3,6 @@ import 'package:dio/dio.dart';
 import '../error/exceptions.dart';
 import '../error/failures.dart';
 
-/// Traduit une erreur technique en [Failure] présentable.
-///
-/// Chaque échec porte deux choses :
-/// - `message` : texte français, conservé pour les journaux et les tests ;
-/// - `code` : identifiant stable utilisé par l'interface pour afficher la
-///   version traduite (voir `core/l10n/failure_l10n.dart`).
-///
-/// Quand le backend renvoie lui-même un message exploitable, le code devient
-/// [FailureCode.serverMessage] : ce texte est affiché tel quel, puisqu'on ne
-/// peut pas le traduire.
 class ErrorMapper {
   const ErrorMapper();
 
@@ -101,7 +91,6 @@ class ErrorMapper {
       );
     }
     if (status >= 500) {
-      // Le détail d'un 5xx n'est jamais montré : il peut contenir une trace.
       return ServerFailure(
         'Le service est momentanément indisponible.',
         statusCode: status,

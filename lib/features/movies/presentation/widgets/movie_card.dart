@@ -5,16 +5,6 @@ import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/movie.dart';
 import 'movie_meta.dart';
 
-/// Ligne de film réutilisée par le catalogue et par les favoris.
-///
-/// Découpage de l'accessibilité :
-/// - la zone tactile principale est un unique nœud `Semantics(button: true)`
-///   qui annonce titre + métadonnées, et dont les enfants sont masqués par
-///   `ExcludeSemantics` — sans cela le lecteur d'écran énonce quatre nœuds
-///   séparés pour une seule carte ;
-/// - le bouton favori reste **en dehors** de cette zone, avec son propre
-///   libellé, sinon il serait avalé par le nœud parent et deviendrait
-///   inatteignable au balayage.
 class MovieCard extends StatelessWidget {
   const MovieCard({
     super.key,

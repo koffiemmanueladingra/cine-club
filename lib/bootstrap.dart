@@ -25,12 +25,6 @@ import 'features/profile/data/datasources/profile_remote_data_source.dart';
 import 'features/profile/data/repositories/profile_repository_impl.dart';
 import 'features/profile/domain/repositories/profile_repository.dart';
 
-/// Composition réelle de l'application : c'est ici, et uniquement ici, que les
-/// implémentations concrètes sont choisies.
-///
-/// Rien dans `lib/features/` ne connaît Dio, Hive ou `connectivity_plus` :
-/// chaque couche ne dépend que des interfaces de `domain/`. C'est ce qui rend
-/// l'arbre remplaçable dans les tests (voir `CineClubProviders`).
 Future<Widget> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -82,8 +76,6 @@ Future<Widget> bootstrap() async {
 
   final authController = AuthController(authRepository);
 
-  // Avant le premier `build` : sans cela, l'écran de connexion s'affiche une
-  // fraction de seconde avant d'être remplacé par le catalogue.
   await authController.bootstrap();
 
   return CineClubProviders(

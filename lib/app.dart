@@ -17,14 +17,9 @@ class CineClubApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Seule la locale est écoutée ici : un changement de langue reconstruit
-    // `MaterialApp`, rien d'autre ne doit provoquer ce rebuild global.
     final locale = context.select<LocaleController, Locale?>((c) => c.locale);
 
     return MaterialApp(
-      // `onGenerateTitle` et non `title` : le titre doit être relu après un
-      // changement de langue, et `AppLocalizations` n'existe pas encore au
-      // moment où `title` serait évalué.
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
       locale: locale,
@@ -44,8 +39,6 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // `select` plutôt que `watch` : seul le statut nous intéresse, un
-    // changement de `isSubmitting` ne doit pas reconstruire tout l'arbre.
     final status = context.select<AuthController, AuthStatus>((c) => c.status);
 
     return switch (status) {
@@ -105,9 +98,6 @@ class _HomeShellState extends State<HomeShell> {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      // `IndexedStack` conserve l'état et la position de défilement de chaque
-      // onglet : changer d'onglet ne relance ni requête ni reconstruction
-      // complète des listes.
       body: IndexedStack(
         index: _index,
         children: const [

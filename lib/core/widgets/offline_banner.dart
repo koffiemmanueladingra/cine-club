@@ -3,14 +3,6 @@ import 'package:intl/intl.dart' as intl;
 
 import '../../l10n/app_localizations.dart';
 
-/// Bandeau signalant que les données affichées viennent du cache local.
-///
-/// La date est formatée par `intl.DateFormat` avec la locale active, et non
-/// par un `padLeft` maison : `15/01/2026 10:30` en français devient
-/// `1/15/2026 10:30 AM` en anglais américain.
-///
-/// `liveRegion: true` fait annoncer le bandeau par les lecteurs d'écran au
-/// moment où il apparaît, sans que l'utilisateur ait à le chercher.
 class OfflineBanner extends StatelessWidget {
   const OfflineBanner({super.key, this.syncedAt});
 

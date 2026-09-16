@@ -22,14 +22,6 @@ class FavoritesController extends ChangeNotifier {
 
   Set<String> _favoriteMovieIds = const <String>{};
 
-  /// Identifiants des films favoris, recalculés une seule fois par
-  /// changement d'état.
-  ///
-  /// Ce cache n'est pas une micro-optimisation. Chaque carte du catalogue
-  /// interroge cet ensemble via `context.select` ; si le getter reconstruisait
-  /// le `Set` à chaque appel, une notification coûterait O(favoris × cartes)
-  /// au lieu de O(favoris). Sur une liste longue, c'est la différence entre
-  /// une frame à 16 ms et une frame qui saute.
   Set<String> get favoriteMovieIds => _favoriteMovieIds;
 
   void _refreshIds() {
