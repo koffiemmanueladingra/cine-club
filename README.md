@@ -319,9 +319,25 @@ n'a pas été appelé — l'arbre sémantique n'est pas construit par défaut en
 | `integration_test/favorites_and_locale_test.dart` | favori ajouté au catalogue visible dans l'onglet Favoris et retiré depuis celui-ci ; changement de langue qui retraduit jusqu'à la barre de navigation |
 
 Ils montent le **vrai** `CineClubApp` et ne remplacent que les quatre
-interfaces de `domain/`. Ils tournent avec `flutter test integration_test`
-dans la VM `flutter_tester` : **aucun émulateur nécessaire**, ce qui les rend
-exécutables tels quels dans GitHub Actions.
+interfaces de `domain/`.
+
+Ils exigent un appareil : l'outillage Flutter le réclame dès que le chemin de
+test est `integration_test/`. En local, précisez-le si plusieurs sont
+disponibles :
+
+```bash
+flutter test integration_test -d windows   # ou -d macos, -d linux
+```
+
+En CI, la cible est **Linux desktop** sous `xvfb` (voir § 11) : quelques
+secondes de démarrage contre 8 à 12 minutes pour un émulateur Android, et
+bien moins instable. Ces tests ne touchant aucune API native, la plateforme
+d'exécution n'influe pas sur ce qu'ils vérifient.
+
+C'est d'ailleurs par eux qu'a été trouvé le bug corrigé en 1.2.1 : `bindUser`
+notifiait ses auditeurs pendant la phase de construction. Aucun test unitaire
+ni de widget ne montait `HomeShell`, le défaut était donc resté invisible
+depuis la version 1.0.0.
 
 ---
 

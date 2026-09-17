@@ -31,6 +31,12 @@ coverage/
 # que l'analyse et les tests fonctionnent sur un clone neuf.
 # Voir https://docs.flutter.dev/release/breaking-changes/flutter-generate-i10n-source
 
+# Binaire de test web téléchargé localement — ne jamais versionner :
+# 25 Mo, spécifique à une plateforme et à une version de Chrome.
+chromedriver
+chromedriver.exe
+chromedriver/
+
 # OS
 .DS_Store
 Thumbs.db

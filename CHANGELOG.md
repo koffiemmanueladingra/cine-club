@@ -5,6 +5,32 @@ Versionnage : [SemVer](https://semver.org/lang/fr/).
 
 ---
 
+## [1.2.1] — 2026-09-17
+
+### Corrigé
+
+- `HomeShell.didChangeDependencies` appelait `bindUser()` de façon synchrone.
+  Cette méthode s'exécute pendant la phase de construction ; le
+  `notifyListeners()` qui la termine demandait à Provider de marquer ses
+  descendants comme « à reconstruire » en plein build, ce qui déclenchait
+  `setState() or markNeedsBuild() called during build`. Les deux appels sont
+  désormais reportés dans le `addPostFrameCallback` qui portait déjà les
+  chargements. Bug présent depuis la version 1.0.0, resté invisible faute de
+  test montant `HomeShell` — révélé par les tests d'intégration.
+
+### Modifié
+
+- CI : les tests d'intégration s'exécutent sur la cible Linux desktop via
+  `xvfb-run` et `-d linux`. La note de la version 1.2.0 affirmant qu'ils
+  tournaient sans appareil dans la VM `flutter_tester` était **erronée** :
+  l'outillage Flutter exige un appareil dès que le chemin de test est
+  `integration_test/`, et le runner en expose deux (Linux et Chrome), d'où
+  l'erreur « More than one device connected ».
+- `l10n.yaml` : suppression de `synthetic-package`, sans effet et signalée
+  comme obsolète par les versions récentes de Flutter.
+
+---
+
 ## [1.2.0] — 2026-09-15
 
 Passage au niveau *production-ready* : internationalisation, accessibilité,

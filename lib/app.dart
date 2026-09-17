@@ -80,13 +80,30 @@ class _HomeShellState extends State<HomeShell> {
 
     final userId = context.read<AuthController>().user?.id;
     if (userId == null || userId == _boundUserId) return;
+
+    // Marqué AVANT le callback : `didChangeDependencies` peut être rappelé
+    // plusieurs fois avant que la frame ne soit dessinée, et sans ce garde
+    // on empilerait plusieurs chargements pour le même utilisateur.
     _boundUserId = userId;
 
-    context.read<FavoritesController>().bindUser(userId);
-    context.read<ProfileController>().bindUser(userId);
-
+    // Tout est reporté après la frame courante, y compris `bindUser`.
+    //
+    // `didChangeDependencies` s'exécute PENDANT la construction (il est
+    // appelé depuis `StatefulElement._firstBuild`). `bindUser` termine par
+    // `notifyListeners()`, ce qui demande à Provider de marquer ses
+    // descendants comme « à reconstruire » — en pleine phase de build.
+    // Flutter lève alors :
+    //   « setState() or markNeedsBuild() called during build ».
+    //
+    // Les contrôleurs restent donc à l'état `idle` le temps d'une frame :
+    // `AsyncView` affiche son indicateur de chargement, ce qui est
+    // exactement le comportement voulu.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+
+      context.read<FavoritesController>().bindUser(userId);
+      context.read<ProfileController>().bindUser(userId);
+
       context.read<MoviesController>().load();
       context.read<FavoritesController>().load();
       context.read<ProfileController>().load();

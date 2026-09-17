@@ -3,7 +3,7 @@ description: >-
   CinéClub — application Flutter full-stack connectée à un backend Supabase
   (API REST PostgREST + Auth JWT), avec cache local Hive CE et mode hors-ligne.
 publish_to: "none"
-version: 1.2.0+3
+version: 1.2.1+4
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
