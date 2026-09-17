@@ -5,6 +5,27 @@ Versionnage : [SemVer](https://semver.org/lang/fr/).
 
 ---
 
+## [1.2.2] — 2026-09-17
+
+### Corrigé
+
+- Tests d'intégration : `tester.pageBack()` remplacé par
+  `find.byType(BackButton)`. `pageBack()` cherche `find.byTooltip('Back')`
+  puis un `CupertinoNavigationBarBackButton` ; l'infobulle venant de
+  `MaterialLocalizations.backButtonTooltip` vaut « Retour » sous locale `fr`,
+  aucune des deux recherches n'aboutissait.
+
+### Modifié
+
+- Les deux fichiers de `integration_test/` sont fusionnés en un seul
+  (`app_test.dart`, 4 parcours répartis en deux `group`).
+  `flutter test integration_test` lance une instance d'application par
+  fichier ; sur la cible Linux desktop sous `xvfb`, le second démarrage
+  échoue (`The log reader stopped unexpectedly`). Contournement de
+  l'instabilité du lanceur, pas correction de sa cause.
+
+---
+
 ## [1.2.1] — 2026-09-17
 
 ### Corrigé

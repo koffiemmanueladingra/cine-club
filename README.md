@@ -315,8 +315,12 @@ n'a pas été appelé — l'arbre sémantique n'est pas construit par défaut en
 
 | Fichier | Parcours |
 |---|---|
-| `integration_test/app_flow_test.dart` | connexion → catalogue → fiche → retour ; recherche → profil → déconnexion |
-| `integration_test/favorites_and_locale_test.dart` | favori ajouté au catalogue visible dans l'onglet Favoris et retiré depuis celui-ci ; changement de langue qui retraduit jusqu'à la barre de navigation |
+| `integration_test/app_test.dart` — groupe `Navigation` | connexion → catalogue → fiche → retour ; recherche → profil → déconnexion |
+| `integration_test/app_test.dart` — groupe `Favoris et langue` | favori ajouté au catalogue visible dans l'onglet Favoris et retiré depuis celui-ci ; changement de langue qui retraduit jusqu'à la barre de navigation |
+
+Un seul fichier, volontairement : `flutter test integration_test` démarre une
+instance d'application **par fichier**, et sur Linux desktop sous `xvfb` le
+second démarrage échoue de façon reproductible.
 
 Ils montent le **vrai** `CineClubApp` et ne remplacent que les quatre
 interfaces de `domain/`.
